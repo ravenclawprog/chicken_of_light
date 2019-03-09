@@ -1,13 +1,11 @@
+#include "LED.h"
+#include "ZEPPELIN.h"
+#include "LED_PWM.h"
+#include "program_parametrs.h"
 /**
 * Аппаратнозависимые переменные
 */
 // Выходные сигналы
-/// Настройки программы
-const unsigned int BLINK_TIME = 500;        // частота мигания светодиодов - 500 мс
-const unsigned int ANTIDEBOUNCE_TIME = 200; // время антидребезга   - 200 мс
-const double PWM_STEP   = 1.0;              // шаг нарастания PWM
-const double MAX_PWM    = 255.0;            // максимальное значение яркости
-const double MIN_PWM    = 0.0;              // минимальное значеие яркости
 /// Пины кнопок
 const int pin_panel_LED_day             = 2;
 const int pin_panel_LED_dawn            = 3;
@@ -40,116 +38,29 @@ enum AUTOMAT_STATE{
     sunset_state,
     night_state
 };
-class LED {
-public:
-        inline LED(bool status = false,
-            int pin = 14,
-            bool reverse_logic = false,
-            unsigned long blink_time = BLINK_TIME);
-        inline operator bool() const;                                  // перегрузка оператора bool
-        inline virtual bool read();                                    // считать состояние светодиода
-        inline virtual void write(bool st_);                           // установить состояние светодиода
-        inline void setReverseLogic();                                 // установить режим обратной логики
-        inline void resetReverseLogic();                               // сбросить режим обратной логики
-        inline virtual void blink();                                           // установить режим мигания
-        inline virtual void setBlinkTime(unsigned long blink_time);            // установить время мигания
-        inline virtual ~LED() {}
-private:
-        int     pin_;                       // пин, к которому подклчен светодиод
-        unsigned long blink_time_;          // время мигания светодиода
-        unsigned long last_time_;           // предыдущее время
-        bool    status_;                    // состояние светодиода - вкл./откл.
-        bool    reverse_logic_;             // обратная логика
 
-protected:
-        inline bool    getStatus() { return this->status_; }
-        inline void    setStatus(bool new_status_) { status_ = new_status_; }
-        inline int     getPin() { return this->pin_; }
-        inline void    setPin(int new_pin_) { pin_ = new_pin_; }   
-        inline bool    getReverseLogic() { return this->reverse_logic_; }
-        inline unsigned long getBlinkTime() { return this->blink_time_; }
-        inline unsigned long getLastTime()  { return this->last_time_; }
-
-};
-class LED_PWM: public LED {
-public:
-    inline LED_PWM(bool status = false,
-            int npin = 6,
-            bool reverse_logic = false,
-            unsigned long blink_time = BLINK_TIME,
-            double step = PWM_STEP);
-    inline virtual bool    read();                                    // считать состояние светодиода
-    inline virtual void    write(bool st_);                           // установить состояние светодиода
-    inline void            write(double pwm_);
-    inline void            setStep(double step);
-    inline double          brightness();
-    inline bool            isMax(double max_ = MAX_PWM);
-    inline bool            isMin(double min_ = MIN_PWM);
-    inline operator double() const;
-    inline virtual ~LED_PWM() {}
-private:
-    double brightness_;
-    double step_;
-};
-
-class ZEPPELIN {
-public:
-        ZEPPELIN(bool status = false,
-            int pin = 2,
-            bool reverse_logic = false,
-            unsigned long anti_debounce_time = ANTIDEBOUNCE_TIME);
-        operator bool() const;                          // перегрузка оператора bool
-        bool read();                                    // считать состояние цепелина
-
-        void setReverseLogic();                         // установить режим обратной логики
-        void resetReverseLogic();                       // сбросить режим обратной логики
-        void setAntiDebounce(unsigned long anti_debounce_time = ANTIDEBOUNCE_TIME);
-        void resetAntiDebounce();
-
-        bool isChange();                                // состояние входа изменилось
-        bool isClicked();                               // кнопка без фиксации состояния - была нажата
-        bool isUp();                                    // состояние входа было изменено с нулевого уровня на первый
-        bool isDown();                                  // состояние входа было изменено с первого на нулевой уровень
-private:
-        bool    out_status_;                            // выход функции
-        bool    status_;                                // состояние светодиода - вкл./откл.
-        int     pin_;                                   // пин, к которому подклчен светодиод
-        int     click_count_;                           // количество кликов
-        bool    anti_debounce_state_;                   // режим анти-дребезга
-        bool    reverse_logic_;                         // обратная логика
-        bool    prev_status_;                           // предыдущее значение статуса
-        unsigned long anti_debounce_time_;              // время антидребезга
-        unsigned long last_time_;                       // переменная времени
-
-        bool    change_;
-        bool    click_;
-        bool    up_;
-        bool    down_;
-
-        void classify();                                // распознавание состояний
-};
 /// Переменная состояни конечного автомата
-static AUTOMAT_STATE light_algorithm_state{undefined_state};
+ AUTOMAT_STATE light_algorithm_state{undefined_state};
 
-static LED panel_LED_day(false,pin_panel_LED_day);
-static LED panel_LED_dawn(false,pin_panel_LED_dawn);
-static LED panel_LED_sunset(false,pin_panel_LED_sunset);
-static LED panel_LED_night(false,pin_panel_LED_night);
+ LED panel_LED_day(false,pin_panel_LED_day);
+ LED panel_LED_dawn(false,pin_panel_LED_dawn);
+ LED panel_LED_sunset(false,pin_panel_LED_sunset);
+ LED panel_LED_night(false,pin_panel_LED_night);
 
-static LED_PWM lighter(false,pin_lighter);
+ LED_PWM lighter(false,pin_lighter);
 
-static LED LED_day(false,pin_LED_day);
-static LED LED_dawn(false,pin_LED_dawn);
-static LED LED_sunset(false,pin_LED_sunset);
-static LED LED_night(false,pin_LED_night);
+ LED LED_day(false,pin_LED_day);
+ LED LED_dawn(false,pin_LED_dawn);
+ LED LED_sunset(false,pin_LED_sunset);
+ LED LED_night(false,pin_LED_night);
 
-static ZEPPELIN button_day(false,pin_button_day);
-static ZEPPELIN button_dawn(false,pin_button_dawn);
-static ZEPPELIN button_sunset(false,pin_button_sunset);
-static ZEPPELIN button_night(false,pin_button_night);
+ ZEPPELIN button_day(false,pin_button_day);
+ ZEPPELIN button_dawn(false,pin_button_dawn);
+ ZEPPELIN button_sunset(false,pin_button_sunset);
+ ZEPPELIN button_night(false,pin_button_night);
 
-static ZEPPELIN rele_time(false,pin_rele_time);
-static ZEPPELIN rele_light(false,pin_rele_light);
+ ZEPPELIN rele_time(false,pin_rele_time);
+ ZEPPELIN rele_light(false,pin_rele_light);
 /// Инициализация 
 void setup()  { 
     // уже проведена в конструкторах
@@ -323,216 +234,4 @@ void loop()  {
             light_algorithm_state = undefined_state; 
     }
     delay(50);                                      // тактируем вызов алгоритма по времени
-}
-
-
-LED::LED(bool status, int pin, bool reverse_logic, unsigned long blink_time)
-{
-    status_ = status;
-    pin_ = pin;
-    reverse_logic_ = reverse_logic;
-    blink_time_ = blink_time;
-    last_time_ = millis();
-
-    pinMode(pin_, OUTPUT);
-    this->write(status);
-}
-
-
-LED::operator bool() const
-{
-    return status_;
-}
-
-bool LED::read()
-{
-    //status_ = digitalRead(pin_);
-    return status_;
-}
-
-void LED::write(bool st_)
-{
-    digitalWrite(pin_, st_ ? (reverse_logic_ ? LOW : HIGH )
-                           : (reverse_logic_ ? HIGH : LOW ));
-    status_ = st_;
-}
-
-void LED::setReverseLogic()
-{
-    reverse_logic_ = true;
-}
-
-void LED::resetReverseLogic()
-{
-    reverse_logic_ = false;
-}
-
-void LED::blink()
-{
-    if(millis()-last_time_ > blink_time_) {
-        write(!(read()));
-        last_time_ = millis();
-    }
-}
-
-void LED::setBlinkTime(unsigned long blink_time)
-{
-    blink_time_ = blink_time;
-}
-
-ZEPPELIN::ZEPPELIN(bool status, int pin, bool reverse_logic, unsigned long anti_debounce_time)
-{
-    status_ = status;
-    pin_ = pin;
-    reverse_logic_ = reverse_logic;
-    anti_debounce_time_ = anti_debounce_time;
-
-    last_time_ = millis();
-    pinMode(pin_, INPUT);
-    digitalWrite(pin_, HIGH );
-    status_ = this->read();
-    prev_status_ = status_;
-    click_count_ = 0;
-}
-
-
-bool ZEPPELIN::read()
-{
-     status_ = reverse_logic_ ? digitalRead(pin_) == HIGH : digitalRead(pin_) == LOW;
-     classify();
-     prev_status_ = status_;
-     return out_status_;
-}
-
-void ZEPPELIN::setReverseLogic()
-{
-    reverse_logic_ = true;
-}
-
-void ZEPPELIN::resetReverseLogic()
-{
-    reverse_logic_ = false;
-}
-
-void ZEPPELIN::setAntiDebounce(unsigned long anti_debounce_time)
-{
-    anti_debounce_time_ = anti_debounce_time;
-}
-
-void ZEPPELIN::resetAntiDebounce()
-{
-    anti_debounce_time_ = 0;
-}
-
-bool ZEPPELIN::isChange()
-{
-    return change_;
-}
-
-bool ZEPPELIN::isClicked()
-{
-    return click_;
-}
-
-bool ZEPPELIN::isUp()
-{
-    return up_;
-}
-
-bool ZEPPELIN::isDown()
-{
-    return down_;
-}
-
-void ZEPPELIN::classify()
-{
-    change_ = status_ ^ prev_status_;            // change
-
-    if(change_){                                 // up and down
-        up_     = (!prev_status_)&&(status_);
-        down_   = (prev_status_)&&(!status_);
-    }
-
-    if(up_){
-        click_ = true;
-        click_count_ ++;
-    }
-
-
-    if(change_){
-       last_time_ = millis();
-       anti_debounce_state_ = true;
-    }
-
-    if(millis() - last_time_ > anti_debounce_time_ && anti_debounce_time_){
-       out_status_ = status_;
-       change_ = true;              // костыльно, но всё же...
-       anti_debounce_time_ = false;
-    }
-
-    if(!anti_debounce_state_){
-        out_status_ = status_;
-    }
-
-}
-
-ZEPPELIN::operator bool() const
-{
-    return out_status_;
-}
-
-LED_PWM::LED_PWM(bool status, int npin, bool reverse_logic, unsigned long blink_time, double step)
-: LED (status,npin,reverse_logic,blink_time)
-{
-    step_ = step ;                    
-    brightness_ = 0.0 ;
-    this->write(status);
-}
-
-bool LED_PWM::read()
-{
-    if(brightness_ >= MAX_PWM) setStatus(true);
-    if(brightness_ <= MIN_PWM) setStatus(false);
-
-    return getStatus();
-}
-
-void LED_PWM::write(bool st_)
-{
-    brightness_ = getReverseLogic() ? (st_ ? brightness_ -= step_ : brightness_ += step_)
-                                    : (st_ ? brightness_ += step_ : brightness_ -= step_);
-    constrain(brightness_,MIN_PWM,MAX_PWM);
-    analogWrite(getPin(),brightness_);
-}
-
-void LED_PWM::write(double pwm_)
-{
-    brightness_ = pwm_;
-    constrain(brightness_,MIN_PWM,MAX_PWM);
-    analogWrite(getPin(),static_cast<int>(brightness_));
-}
-
-void LED_PWM::setStep(double step)
-{
-    step_ = step;
-}
-
-double LED_PWM::brightness()
-{
-    return  brightness_;
-}
-
-bool LED_PWM::isMax(double max_)
-{
-    return brightness_ >= max_;
-}
-
-bool LED_PWM::isMin(double min_)
-{
-    return brightness_ <= min_;
-}
-
-LED_PWM::operator double() const
-{
-    return  brightness_;
 }
