@@ -124,11 +124,13 @@ void ZEPPELIN::classify()
        anti_debounce_state_ = true;
     }
 
-    if((millis() - last_time_ > anti_debounce_time_) && anti_debounce_state_){
+    if((millis() - last_time_ >= anti_debounce_time_) && anti_debounce_state_){
        out_status_ = status_;
        change_ = true;              // костыльно, но всё же...
        anti_debounce_state_ = false;
-    }
+    } else {
+	   change_ = false;
+	}
 
     if(!anti_debounce_state_){
         out_status_ = status_;

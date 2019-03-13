@@ -59,15 +59,20 @@ enum AUTOMAT_STATE{
  ZEPPELIN button_sunset(false,pin_button_sunset);
  ZEPPELIN button_night(false,pin_button_night);
 
- ZEPPELIN rele_time(false,pin_rele_time);
- ZEPPELIN rele_light(false,pin_rele_light);
+ ZEPPELIN rele_time(false,pin_rele_time, true);
+ ZEPPELIN rele_light(false,pin_rele_light, true);
 /// Инициализация 
 void setup()  { 
     // уже проведена в конструкторах
 } 
 /// Основной рабочий цикл 
 void loop()  { 
-
+	rele_light.read();
+	rele_time.read();
+	button_day.read();
+	button_dawn.read();
+	button_night.read();
+	button_sunset.read();
     switch(light_algorithm_state){                              // Проверяем состояние конечного автомата
                 case undefined_state:                               // если это неопределенное состояние
         {
@@ -83,11 +88,11 @@ void loop()  {
                         LED_sunset.write(false);
                         LED_night.write(false);
 
-                        if (!(  rele_time.read() == false &&                            // если включено реле времени
-                                rele_light.read()== true )) {                           // и свет отключен
-                                light_algorithm_state = sunset_state;           // переходим в рассвет
+                        if (!(  rele_time == false &&                            // если включено реле времени
+                                rele_light== true )) {                           // и свет отключен
+                                light_algorithm_state = sunset_state;           // переходим в закат
             } else {
-                                light_algorithm_state = dawn_state;             // иначе - переходим в закат
+                                light_algorithm_state = dawn_state;             // иначе - переходим в рассвет
             }
         } break;
                 case dawn_state:                            // если мы в режиме рассвета
@@ -103,23 +108,23 @@ void loop()  {
                         panel_LED_dawn.blink();//LED_dawn.write(true);
                         LED_sunset.write(false);
                         LED_night.write(false);
-                        if( button_night.read() == false
+                        if( button_night == false
                             && button_night.isChange() ) {                                      // если была нажата кнопка ночь
                                 light_algorithm_state = sunset_state;                           // переводим состояние алгоритма в режим закат
-                        } else if (button_sunset.read() == false
+                        } else if (button_sunset == false
                                    && button_sunset.isChange()) {                               // если же была нажата кнопка закат
                                 light_algorithm_state = sunset_state;                           // переводим состояние алгоритма в режим закат
-                        } else if (button_day.read() == false
+                        } else if (button_day == false
                                    && button_day.isChange()) {                                  // если же была нажата кнопка день
                 light_algorithm_state = day_state;              // переводим в состояние день
                         } else if (lighter.isMax()) {                       // если мы зажгли нашу лампу на полную
                 light_algorithm_state = day_state;              // переводим алгоритм в состояние день
-                        }  else if (!(  rele_time.read() == false &&                            // если включено реле времени
-                                        rele_light.read()== true )&&
+                        }  else if (!(  rele_time == false &&                            // если включено реле времени
+                                        rele_light== true )&&
                                        (rele_time.isChange() || rele_light.isChange())) {       // и реле освещенности выключено
                                 light_algorithm_state = sunset_state;                           // то переходим в состояние закат
-                        } else if(    rele_time.read() == false &&                              // если включено реле времени
-                                      rele_light.read()== true  &&
+                        } else if(    rele_time == false &&                              // если включено реле времени
+                                      rele_light== true  &&
                                      (rele_time.isChange() || rele_light.isChange())) {         // и реле освещенности выключено
                 light_algorithm_state = dawn_state;             // остаёмся в режиме рассвет
             }
@@ -137,21 +142,21 @@ void loop()  {
                         LED_dawn.write(false);
                         LED_sunset.write(false);
                         LED_night.write(false);
-                        if( button_night.read() == false
+                        if( button_night == false
                             && button_night.isChange() ) {
                 light_algorithm_state = sunset_state;   
-                        } else if (button_sunset.read() == false
+                        } else if (button_sunset == false
                                    && button_sunset.isChange()) {
                 light_algorithm_state = sunset_state;   
-                        } else if (button_dawn.read() == false
+                        } else if (button_dawn == false
                                    && button_dawn.isChange()) {
                 light_algorithm_state = day_state;
-                        } else if (!(  rele_time.read() == false &&                            // если включено реле времени
-                                       rele_light.read()== true )&&
+                        } else if (!(  rele_time == false &&                            // если включено реле времени
+                                       rele_light== true )&&
                                       (rele_time.isChange() || rele_light.isChange())) {
                 light_algorithm_state = sunset_state;
-                        } else if(    rele_time.read() == false &&                            // если включено реле времени
-                                      rele_light.read()== true  &&
+                        } else if(    rele_time == false &&                            // если включено реле времени
+                                      rele_light== true  &&
                                      (rele_time.isChange() || rele_light.isChange())) {
                 light_algorithm_state = day_state;
             }
@@ -170,26 +175,26 @@ void loop()  {
                         LED_sunset.blink();//LED_sunset.write(true);
                         LED_night.write(false);
 
-                        if( button_night.read() == false
+                        if( button_night == false
                             && button_night.isChange() ) {
                 light_algorithm_state = night_state;    
-                        } else if (button_sunset.read() == false
+                        } else if (button_sunset == false
                                    && button_sunset.isChange()) {
                 light_algorithm_state = sunset_state;   
-                        } else if (button_day.read() == false
+                        } else if (button_day == false
                                    && button_day.isChange()) {
                 light_algorithm_state = dawn_state; 
-                        } else if (button_dawn.read() == false
+                        } else if (button_dawn == false
                                    && button_dawn.isChange()) {
                 light_algorithm_state = dawn_state; 
                         } else if (lighter.isMin()) {
                 light_algorithm_state = night_state;    
-                        } else if (!(  rele_time.read() == false &&                            // если включено реле времени
-                                       rele_light.read()== true )&&
+                        } else if (!(  rele_time == false &&                            // если включено реле времени
+                                       rele_light== true )&&
                                       (rele_time.isChange() || rele_light.isChange())) {
                 light_algorithm_state = night_state;
-                        } else if(rele_time.read() == false &&                            // если включено реле времени
-                                  rele_light.read()== true  &&
+                        } else if(rele_time == false &&                            // если включено реле времени
+                                  rele_light== true  &&
                                  (rele_time.isChange() || rele_light.isChange())) {
                 light_algorithm_state = dawn_state;
             }
@@ -208,25 +213,25 @@ void loop()  {
                         LED_sunset.write(false);
                         LED_night.write(true);
 
-                        if(button_night.read() == false
+                        if(button_night == false
                            && button_night.isChange()) {
                 light_algorithm_state = night_state;    
-                        } else if (button_sunset.read() == false
+                        } else if (button_sunset == false
                                    && button_sunset.isChange()) {
                 light_algorithm_state = sunset_state;   
-                        } else if (button_dawn.read() == false
+                        } else if (button_dawn == false
                                    && button_dawn.isChange()) {
                 light_algorithm_state = dawn_state;
-                        } else if (button_day.read() == false
+                        } else if (button_day == false
                                    && button_day.isChange()) {
                 light_algorithm_state = dawn_state;
-                        } else if (!(  rele_time.read() == false &&                            // если включено реле времени
-                                       rele_light.read()== true )&&
+                        } else if (!(  rele_time == false &&                            // если включено реле времени
+                                       rele_light== true )&&
                                       (rele_time.isChange() || rele_light.isChange())) {
                 light_algorithm_state = night_state;
-                        } else if(rele_time.read() == false &&                            // если включено реле времени
-                                  rele_light.read()== true  &&
-                                 (rele_time.isChange() || rele_light.isChange())) {
+                        } else if(rele_time == false &&                            // если включено реле времени
+                                  rele_light== true  &&
+                                 (rele_time.isChange() || rele_light.isChange())) {			
                 light_algorithm_state = dawn_state;
             }
         } break;
