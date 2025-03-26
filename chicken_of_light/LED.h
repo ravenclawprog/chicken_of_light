@@ -6,27 +6,28 @@
 class LED
 {
 public:
-    inline LED(bool status = false,
-               int pin = 14,
-               bool reverse_logic = false,
-               unsigned long blink_time = BLINK_TIME);
-    inline operator bool() const;                               // перегрузка оператора bool
-    inline bool read();                                 // считать состояние светодиода
-    inline void write(bool st_);                        // установить состояние светодиода
-    inline void setReverseLogic();                              // установить режим обратной логики
-    inline void resetReverseLogic();                            // сбросить режим обратной логики
+    inline LED(bool status = false,                     // начальное состояние, записывается в порт
+               int pin = 14,                            // порт, в который будет происходить запись
+               bool reverse_logic = false,              // начальное значение обратной логики
+               unsigned long blink_time = BLINK_TIME);  // установка значение мигания по умолчанию
+    inline operator bool() const;                       // перегрузка оператора bool - возвращает состояние
+    inline bool read();                                 // считать состояние светодиода, возвращает значение переменной, не читает данные с порта
+    inline void write(bool st_);                        // установить состояние светодиода, записывает значение в порт
+    inline void setReverseLogic();                      // установить режим обратной логики, не вызывает перезаписи в порт
+    inline void resetReverseLogic();                    // сбросить режим обратной логики, не вызывает перезаписи в порт
     inline void blink();                                // установить режим мигания
     inline void setBlinkTime(unsigned long blink_time); // установить время мигания
     inline ~LED() {}
 
 private:
     int pin_;                  // пин, к которому подклчен светодиод
-    unsigned long blink_time_; // время мигания светодиода
-    unsigned long last_time_;  // предыдущее время
-    bool status_;              // состояние светодиода - вкл./откл.
-    bool reverse_logic_;       // обратная логика
+    unsigned long blink_time_; // время мигания светодиода, мс
+    unsigned long last_time_;  // предыдущее время, мс
+    bool status_;              // состояние светодиода - вкл./откл. - true - вкл, false - откл. (всегда)
+    bool reverse_logic_;       // флаг использования обратной логики - влияет только на запись
 
 protected:
+    // геттеры и сеттеры для наследования
     inline bool getStatus() { return this->status_; }
     inline void setStatus(bool new_status_) { status_ = new_status_; }
     inline int getPin() { return this->pin_; }

@@ -23,20 +23,20 @@ public:
     bool isUp();      // состояние входа было изменено с нулевого уровня на первый
     bool isDown();    // состояние входа было изменено с первого на нулевой уровень
 private:
-    bool out_status_;                  // выход функции
-    bool status_;                      // состояние светодиода - вкл./откл.
-    int pin_;                          // пин, к которому подклчен светодиод
-    int click_count_;                  // количество кликов
-    bool anti_debounce_state_;         // режим анти-дребезга
-    bool reverse_logic_;               // обратная логика
+    bool out_status_;                  // выходное состояние кнопки (изменяется после антидребезга)
+    bool status_;                      // состояние кнопки - нажата, отжака
+    int pin_;                          // пин, к которому подклчена кнопка
+    int click_count_;                  // количество кликов кнопки - просто счетчик
+    bool anti_debounce_state_;         // режим анти-дребезга, true - вкл, false - откл.
+    bool reverse_logic_;               // обратная логика, влияет только на чтение данных
     bool prev_status_;                 // предыдущее значение статуса
     unsigned long anti_debounce_time_; // время антидребезга
     unsigned long last_time_;          // переменная времени
 
-    bool change_;
-    bool click_;
-    bool up_;
-    bool down_;
+    bool change_; // событие изменения
+    bool click_;  // событие клик
+    bool up_;     // событие отжат
+    bool down_;   // событие нажат
 
     void classify(); // распознавание состояний
 };
